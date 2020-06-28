@@ -1,4 +1,8 @@
+@import "~normalize.css";
+@import "roboto.css";
+
 body{
+    font-family: 'Roboto', sans-serif;
     box-sizing: border-box;
     padding: 0;
     margin: 0;
@@ -16,4 +20,17 @@ h1{
     font-weight: bold;
     font-size: 25px;
     text-align: center;
+}
+
+.logo{
+    background-image: url("../assets/webpack-logo.png");
+    background-size: cover;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+}
+
+.code{
+    color: gold;
+    font-size: 20px;
 }
