@@ -9,6 +9,44 @@ const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plug
 const isDev = process.env.NODE_ENV === 'development';
 const isProd = !isDev;
 
+const optimization = () => {
+    const config = {
+        splitChunks: {
+            chunks: "all"
+        }
+    }
+
+    if(isProd){
+        config.minimizer = [
+            new OptimizeCssAssetsWebpackPlugin(),
+            new TerserWebpackPlugin()
+        ]
+    }
+
+    return config
+}
+
+const filename = ext => isDev ? `[name].${ext}` : `[name].[hash].${ext}`;
+
+const cssLoaders = preprocVar => {
+    const loaders = [
+        {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+                hmr: isDev,
+                reloadAll: true
+            },
+        },
+        'css-loader'
+    ]
+
+    if(preprocVar) {
+        loaders.push(preprocVar)
+    }
+
+    return loaders
+}
+
 module.exports = {
     context: path.resolve(__dirname, 'src'),
     mode: "development",
@@ -17,7 +55,7 @@ module.exports = {
         analytics: './analytics.js'
     },
     output: {
-        filename: '[name].[contenthash].js',
+        filename: filename('js'),
         path: path.resolve(__dirname, 'dist')
     },
     resolve: {
@@ -27,11 +65,7 @@ module.exports = {
             '@' : path.resolve(__dirname, 'src')
         }
     },
-    optimization: {
-        splitChunks: {
-            chunks: "all"
-        }
-    },
+    optimization: optimization(),
     devServer: {
         port: 4200,
         hot: isDev
@@ -53,22 +87,20 @@ module.exports = {
             ]
         }),
         new MiniCssExtractPlugin({
-            filename: '[name].[contenthash].css'
+            filename: filename('css')
         })
     ],
     module: {
         rules: [
             {
                 test: /\.css$/,
-                use: [
-                    {
-                        loader: MiniCssExtractPlugin.loader,
-                        options: {
-                            hmr: isDev,
-                            reloadAll: true
-                        },
-                    },
-                    'css-loader']
+                use: cssLoaders()
+            },{
+                test: /\.less$/,
+                use: cssLoaders('less-loader')
+            },{
+                test: /\.s[ac]ss$/,
+                use: cssLoaders('sass-loader')
             },{
                 test: /\.(png|jpg|gif|svg)$/,
                 use: ['file-loader']
